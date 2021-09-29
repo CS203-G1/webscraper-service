@@ -31,7 +31,7 @@ public class WebScraperServiceImpl implements WebScraperService {
         this.covidDataRepostiory = covidDataRepostiory;
     }
 
-    @Scheduled(fixedDelay = 30000)
+    @Scheduled(cron = "@midnight")
     public void scrapeData() {
         LOGGER.info("------ STARTING TO SCRAPE " + url);
 
