@@ -72,6 +72,6 @@ public class CovidData {
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_date")
-    private Date createdDate;
+    @Column(name = "created_at")
+    private Date createdAt;
 }
