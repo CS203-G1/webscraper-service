@@ -9,7 +9,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +39,7 @@ public class WebScraperServiceImpl implements WebScraperService {
         scrapeMohData(covidData, driver);
         scrapeGovData(covidData, driver);
 
-        // covidDataRepository.save(covidData);
+        covidDataRepository.save(covidData);
         System.out.println(covidData);
 
         LOGGER.info("------ SHUTTING DOWN SELENIUM");
@@ -74,7 +73,6 @@ public class WebScraperServiceImpl implements WebScraperService {
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + mohUrl);
     }
 
-
     public void scrapeGovData(CovidData covidData, WebDriver driver) {
         LOGGER.info("------ STARTING TO SCRAPE " + govUrl);
 
@@ -88,21 +86,13 @@ public class WebScraperServiceImpl implements WebScraperService {
         WebElement caseSummarySibling = caseSummary.findElement(By.xpath("following-sibling::*"));
         List<WebElement> caseSummaryElements = caseSummarySibling.findElements(By.tagName("td"));
 
-        // System.out.println(vaccineDataElements.get(0).getText());
-        // System.out.println(vaccineDataElements.get(2).getText());
-        // System.out.println(vaccineDataElements.get(1).getText());
-        // System.out.println(vaccineDataElements.get(3).getText().split("\n")[0]);
-        // System.out.println(vaccineDataElements.get(4).getText());
-        // System.out.println(vaccineDataElements.get(5).getText().split("\n")[0]);
-
         try {
-            System.out.println(vaccineDataElements.get(2).getText() + " | " + vaccineDataElements.get(3).getText().split("\r\n|\s")[0]);
-            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(0).getText(), Integer.parseInt(vaccineDataElements.get(2).getText()));
-            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(1).getText(), Integer.parseInt(vaccineDataElements.get(3).getText().split("\r\n")[0]));
-            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(4).getText(), Integer.parseInt(vaccineDataElements.get(5).getText().split("\r\n")[0]));
-            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(0).getText(), Integer.parseInt(caseSummaryElements.get(2).getText()));
-            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(1).getText(), Integer.parseInt(caseSummaryElements.get(3).getText()));
-            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(4).getText(), Integer.parseInt(caseSummaryElements.get(5).getText()));
+            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(0).getText(), Integer.parseInt(vaccineDataElements.get(2).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(1).getText(), Integer.parseInt(vaccineDataElements.get(3).getText().split("\n")[0].replace(",", "")));
+            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(4).getText(), Integer.parseInt(vaccineDataElements.get(5).getText().split("\n")[0].replace(",", "")));
+            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(0).getText(), Integer.parseInt(caseSummaryElements.get(2).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(1).getText(), Integer.parseInt(caseSummaryElements.get(3).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(4).getText(), Integer.parseInt(caseSummaryElements.get(5).getText().replace(",", "")));
         }  catch (IndexOutOfBoundsException e) {
             // Consume error for data that we do not wish to store
         } catch (NumberFormatException e) {

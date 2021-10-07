@@ -23,6 +23,7 @@ public class WebScraperUtils {
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--start-maximized");
 
         return chromeOptions;
     }
