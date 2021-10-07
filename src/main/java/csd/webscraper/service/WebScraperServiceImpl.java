@@ -14,31 +14,31 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import csd.webscraper.model.CovidData;
-import csd.webscraper.repository.CovidDataRepostiory;
+import csd.webscraper.repository.CovidDataRepository;
 import csd.webscraper.utils.WebScraperUtils;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 @Service
 public class WebScraperServiceImpl implements WebScraperService {
-    @Value("${app.url}")
-    private String url;
+    private final static String mohUrl = "https://www.moh.gov.sg/covid-19/statistics";
+    private final static String govUrl = "https://www.gov.sg/COVID-19";
 
     private static final Logger LOGGER = LogManager.getLogger(WebScraperServiceImpl.class);
-    private CovidDataRepostiory covidDataRepostiory;
+    private CovidDataRepository covidDataRepository;
 
     @Autowired
-    public WebScraperServiceImpl(CovidDataRepostiory covidDataRepostiory) {
-        this.covidDataRepostiory = covidDataRepostiory;
+    public WebScraperServiceImpl(CovidDataRepository covidDataRepository) {
+        this.covidDataRepository = covidDataRepository;
     }
 
     @Scheduled(cron = "@midnight")
     public void scrapeData() {
-        LOGGER.info("------ STARTING TO SCRAPE " + url);
+        LOGGER.info("------ STARTING TO SCRAPE " + mohUrl);
 
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver(WebScraperUtils.getChromeOptions());
 
-        driver.get(url);
+        driver.get(mohUrl);
         List<WebElement> elements = driver.findElements(By.className("sfContentBlock"));
         CovidData covidData = new CovidData();
 
@@ -59,7 +59,7 @@ public class WebScraperServiceImpl implements WebScraperService {
                 // Consume error for data that we do not wish to store
             }
         }
-        covidDataRepostiory.save(covidData);
+        covidDataRepository.save(covidData);
         LOGGER.info("------ SUCCESSFULLY SCRAPED DATA");
         LOGGER.info("------ SHUTTING DOWN SELENIUM");
         driver.quit();

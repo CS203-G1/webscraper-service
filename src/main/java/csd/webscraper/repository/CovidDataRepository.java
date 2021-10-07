@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import csd.webscraper.model.CovidData;
 
 @Repository
-public interface CovidDataRepostiory extends JpaRepository<CovidData, UUID> {
+public interface CovidDataRepository extends JpaRepository<CovidData, UUID> {
 
 }
