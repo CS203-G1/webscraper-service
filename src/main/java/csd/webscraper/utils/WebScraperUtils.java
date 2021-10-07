@@ -9,9 +9,12 @@ import csd.webscraper.model.CovidData;
 
 @Component
 public class WebScraperUtils {
-    private static final List<String> COVID_DATA = List.of("Hospitalised", "Hospitalised (ICU)",
-            "Require Oxygen Supplementation", "Deaths^", "Total Swabs Tested",
-            "Average Daily Number of Swabs Tested Over The Past Week", "Total Swabs Per 1,000,000 Total Population");
+    private static final List<String> COVID_DATA = List.of(
+        "Total new cases", "Local cases", "Imported cases",
+        "Hospitalised", "Hospitalised (ICU)", "Require Oxygen Supplementation", "Deaths^", "Total Swabs Tested",
+        "Average Daily Number of Swabs Tested Over The Past Week", "Total Swabs Per 1,000,000 Total Population",
+        "Total Doses Administrated", "Received at least one dose", "Completed full regimen"
+    );
 
     public static ChromeOptions getChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
@@ -20,6 +23,7 @@ public class WebScraperUtils {
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--headless");
+        chromeOptions.addArguments("--start-maximized");
 
         return chromeOptions;
     }
@@ -32,6 +36,15 @@ public class WebScraperUtils {
 
     public static void updateModel(CovidData covidData, String header, int value) {
         switch (header) {
+            case "Total new cases":
+                covidData.setNewCases(value);
+                break;
+            case "Local cases":
+                covidData.setNewLocalCases(value);
+                break;
+            case "Imported cases":
+                covidData.setNewImportedCases(value);
+                break;
             case "Hospitalised":
                 covidData.setHospitalised(value);
                 break;
@@ -52,6 +65,15 @@ public class WebScraperUtils {
                 break;
             case "Total Swabs Per 1,000,000 Total Population":
                 covidData.setTotalSwabPerMillion(value);
+                break;
+            case "Total Doses Administrated":
+                covidData.setTotalVaccinationDoses(value);
+                break;
+            case "Received at least one dose":
+                covidData.setAtLeastOneDose(value);
+                break;
+            case "Completed full regimen":
+                covidData.setCompletedFullRegimen(value);
                 break;
             default:
                 break;

@@ -9,38 +9,48 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import csd.webscraper.model.CovidData;
-import csd.webscraper.repository.CovidDataRepostiory;
+import csd.webscraper.repository.CovidDataRepository;
 import csd.webscraper.utils.WebScraperUtils;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 @Service
 public class WebScraperServiceImpl implements WebScraperService {
-    @Value("${app.url}")
-    private String url;
+    private final static String mohUrl = "https://www.moh.gov.sg/covid-19/statistics";
+    private final static String govUrl = "https://www.gov.sg/COVID-19";
 
     private static final Logger LOGGER = LogManager.getLogger(WebScraperServiceImpl.class);
-    private CovidDataRepostiory covidDataRepostiory;
+    private CovidDataRepository covidDataRepository;
 
     @Autowired
-    public WebScraperServiceImpl(CovidDataRepostiory covidDataRepostiory) {
-        this.covidDataRepostiory = covidDataRepostiory;
+    public WebScraperServiceImpl(CovidDataRepository covidDataRepository) {
+        this.covidDataRepository = covidDataRepository;
     }
 
     @Scheduled(cron = "@midnight")
     public void scrapeData() {
-        LOGGER.info("------ STARTING TO SCRAPE " + url);
-
+        CovidData covidData = new CovidData();
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver(WebScraperUtils.getChromeOptions());
 
-        driver.get(url);
+        scrapeMohData(covidData, driver);
+        scrapeGovData(covidData, driver);
+
+        covidDataRepository.save(covidData);
+        System.out.println(covidData);
+
+        LOGGER.info("------ SHUTTING DOWN SELENIUM");
+        driver.quit();
+    }
+
+    public void scrapeMohData(CovidData covidData, WebDriver driver) {
+        LOGGER.info("------ STARTING TO SCRAPE " + mohUrl);
+
+        driver.get(mohUrl);
         List<WebElement> elements = driver.findElements(By.className("sfContentBlock"));
-        CovidData covidData = new CovidData();
 
         for (int i = 0; i < elements.size(); i++) {
             try {
@@ -59,9 +69,36 @@ public class WebScraperServiceImpl implements WebScraperService {
                 // Consume error for data that we do not wish to store
             }
         }
-        covidDataRepostiory.save(covidData);
-        LOGGER.info("------ SUCCESSFULLY SCRAPED DATA");
-        LOGGER.info("------ SHUTTING DOWN SELENIUM");
-        driver.quit();
+
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + mohUrl);
+    }
+
+    public void scrapeGovData(CovidData covidData, WebDriver driver) {
+        LOGGER.info("------ STARTING TO SCRAPE " + govUrl);
+
+        driver.get(govUrl);
+
+        WebElement vaccineData = driver.findElement(By.id("vaccinedata"));
+        WebElement vaccineDataSibling = vaccineData.findElement(By.xpath("following-sibling::*"));
+        List<WebElement> vaccineDataElements = vaccineDataSibling.findElements(By.tagName("td"));
+
+        WebElement caseSummary = driver.findElement(By.id("casesummary"));
+        WebElement caseSummarySibling = caseSummary.findElement(By.xpath("following-sibling::*"));
+        List<WebElement> caseSummaryElements = caseSummarySibling.findElements(By.tagName("td"));
+
+        try {
+            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(0).getText(), Integer.parseInt(vaccineDataElements.get(2).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(1).getText(), Integer.parseInt(vaccineDataElements.get(3).getText().split("\n")[0].replace(",", "")));
+            WebScraperUtils.updateModel(covidData, vaccineDataElements.get(4).getText(), Integer.parseInt(vaccineDataElements.get(5).getText().split("\n")[0].replace(",", "")));
+            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(0).getText(), Integer.parseInt(caseSummaryElements.get(2).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(1).getText(), Integer.parseInt(caseSummaryElements.get(3).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, caseSummaryElements.get(4).getText(), Integer.parseInt(caseSummaryElements.get(5).getText().replace(",", "")));
+        }  catch (IndexOutOfBoundsException e) {
+            // Consume error for data that we do not wish to store
+        } catch (NumberFormatException e) {
+            // Consume error for data that we do not wish to store
+        }
+
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + govUrl);
     }
 }

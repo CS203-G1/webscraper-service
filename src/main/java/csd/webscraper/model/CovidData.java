@@ -1,6 +1,6 @@
 package csd.webscraper.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -8,8 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -34,6 +32,21 @@ public class CovidData {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private UUID id;
+
+    @Column(name = "new_cases")
+    @NotNull(message = "New cases count must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int newCases;
+
+    @Column(name = "new_local_cases")
+    @NotNull(message = "New local cases count must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int newLocalCases;
+
+    @Column(name = "new_imported_cases")
+    @NotNull(message = "New imported cases count count must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int newImportedCases;
 
     @Column(name = "hospitalised")
     @NotNull(message = "Hospitalised count must not be null")
@@ -70,8 +83,22 @@ public class CovidData {
     @PositiveOrZero(message = "Count must be positive or zero")
     private int totalSwabPerMillion;
 
+    @Column(name = "total_vaccination_dose")
+    @NotNull(message = "Total vaccination dose count must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int totalVaccinationDoses;
+
+    @Column(name = "at_least_one_dose")
+    @NotNull(message = "Number of people who received at least one dose must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int atLeastOneDose;
+
+    @Column(name = "completed_full_regimen")
+    @NotNull(message = "Number of people who completed full regimen must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int completedFullRegimen;
+
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_at")
-    private Date createdAt;
+    private LocalDateTime createdAt;
 }

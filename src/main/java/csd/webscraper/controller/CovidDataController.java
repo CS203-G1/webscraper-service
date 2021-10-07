@@ -25,6 +25,6 @@ public class CovidDataController {
     @GetMapping("/scrape")
     public ResponseEntity<String> manualScrape() {
         webScraperService.scrapeData();
-        return new ResponseEntity<String>(HttpStatus.OK);
+        return new ResponseEntity<String>("Scraped", HttpStatus.OK);
     }
 }
