@@ -10,8 +10,8 @@ import csd.webscraper.model.CovidData;
 @Component
 public class WebScraperUtils {
     private static final List<String> COVID_DATA = List.of(
-        "Total new cases", "Local cases", "Imported cases",
-        "Hospitalised", "Hospitalised (ICU)", "Require Oxygen Supplementation", "Deaths^", "Total Swabs Tested",
+        "Total new cases", "Local cases", "Imported cases", "Total covid cases", "Total recovered", "Total deaths",
+        "Hospitalised", "Hospitalised (ICU)", "Require Oxygen Supplementation", "Total Swabs Tested",
         "Average Daily Number of Swabs Tested Over The Past Week", "Total Swabs Per 1,000,000 Total Population",
         "Total Doses Administrated", "Received at least one dose", "Completed full regimen"
     );
@@ -54,8 +54,8 @@ public class WebScraperUtils {
             case "Require Oxygen Supplementation":
                 covidData.setRequireOxygen(value);
                 break;
-            case "Deaths^":
-                covidData.setDeaths(value);
+            case "Total deaths":
+                covidData.setTotalDeaths(value);
                 break;
             case "Total Swabs Tested":
                 covidData.setTotalSwab(value);
@@ -75,6 +75,10 @@ public class WebScraperUtils {
             case "Completed full regimen":
                 covidData.setCompletedFullRegimen(value);
                 break;
+            case "Total covid cases":
+                covidData.setTotalCovidCases(value);
+            case "Total recovered":
+                covidData.setTotalRecovered(value);
             default:
                 break;
         }

@@ -63,10 +63,10 @@ public class CovidData {
     @PositiveOrZero(message = "Count must be positive or zero")
     private int requireOxygen;
 
-    @Column(name = "deaths")
+    @Column(name = "total_deaths")
     @NotNull(message = "Death count must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
-    private int deaths;
+    private int totalDeaths;
 
     @Column(name = "total_swabs")
     @NotNull(message = "Total swab count must not be null")
@@ -97,6 +97,16 @@ public class CovidData {
     @NotNull(message = "Number of people who completed full regimen must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
     private int completedFullRegimen;
+
+    @Column(name = "total_covid_cases")
+    @NotNull(message = "Number of covid cases must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int totalCovidCases;
+
+    @Column(name = "total_recovered")
+    @NotNull(message = "Number of recovered must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int totalRecovered;
 
     @CreationTimestamp
     @Column(name = "created_at")
