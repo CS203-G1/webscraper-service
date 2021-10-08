@@ -8,4 +8,5 @@ public interface WebScraperService {
     void scrapeData();
     void scrapeMohData(CovidData covidData, WebDriver driver);
     void scrapeGovData(CovidData covidData, WebDriver driver);
+    void scrapeCaseData(CovidData covidData, WebDriver driver);
 }

@@ -21,6 +21,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 public class WebScraperServiceImpl implements WebScraperService {
     private final static String mohUrl = "https://www.moh.gov.sg/covid-19/statistics";
     private final static String govUrl = "https://www.gov.sg/COVID-19";
+    private final static String caseUrl = "https://www.worldometers.info/coronavirus/country/singapore/";
 
     private static final Logger LOGGER = LogManager.getLogger(WebScraperServiceImpl.class);
     private CovidDataRepository covidDataRepository;
@@ -38,9 +39,10 @@ public class WebScraperServiceImpl implements WebScraperService {
 
         scrapeMohData(covidData, driver);
         scrapeGovData(covidData, driver);
+        scrapeCaseData(covidData, driver);
 
         covidDataRepository.save(covidData);
-        System.out.println(covidData);
+        LOGGER.info("------ SAVED MODEL IN DB");
 
         LOGGER.info("------ SHUTTING DOWN SELENIUM");
         driver.quit();
@@ -67,6 +69,8 @@ public class WebScraperServiceImpl implements WebScraperService {
                 // Consume error for data that we do not wish to store
             } catch (NumberFormatException e) {
                 // Consume error for data that we do not wish to store
+            } catch (Exception e) {
+                LOGGER.warn(e.getMessage());
             }
         }
 
@@ -93,12 +97,36 @@ public class WebScraperServiceImpl implements WebScraperService {
             WebScraperUtils.updateModel(covidData, caseSummaryElements.get(0).getText(), Integer.parseInt(caseSummaryElements.get(2).getText().replace(",", "")));
             WebScraperUtils.updateModel(covidData, caseSummaryElements.get(1).getText(), Integer.parseInt(caseSummaryElements.get(3).getText().replace(",", "")));
             WebScraperUtils.updateModel(covidData, caseSummaryElements.get(4).getText(), Integer.parseInt(caseSummaryElements.get(5).getText().replace(",", "")));
-        }  catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             // Consume error for data that we do not wish to store
         } catch (NumberFormatException e) {
             // Consume error for data that we do not wish to store
+        } catch (Exception e) {
+            LOGGER.warn(e.getMessage());
         }
 
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + govUrl);
+    }
+
+    public void scrapeCaseData(CovidData covidData, WebDriver driver) {
+        LOGGER.info("------ STARTING TO SCRAPE " + caseUrl);
+
+        driver.get(caseUrl);
+
+        List<WebElement> elements = driver.findElements(By.className("maincounter-number"));
+
+        try {
+            WebScraperUtils.updateModel(covidData, "Total covid cases", Integer.parseInt(elements.get(0).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, "Total deaths", Integer.parseInt(elements.get(1).getText().replace(",", "")));
+            WebScraperUtils.updateModel(covidData, "Total recovered", Integer.parseInt(elements.get(2).getText().replace(",", "")));
+        } catch (IndexOutOfBoundsException e) {
+            // Consume error for data that we do not wish to store
+        } catch (NumberFormatException e) {
+            // Consume error for data that we do not wish to store
+        } catch (Exception e) {
+            LOGGER.warn(e.getMessage());
+        }
+
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + caseUrl);
     }
 }
