@@ -38,10 +38,15 @@ public class CovidData {
     @PositiveOrZero(message = "Count must be positive or zero")
     private int newCases;
 
-    @Column(name = "new_local_cases")
-    @NotNull(message = "New local cases count must not be null")
+    @Column(name = "new_community_cases")
+    @NotNull(message = "New community cases count must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
-    private int newLocalCases;
+    private int newCommunityCases;
+
+    @Column(name = "new_dormitory_cases")
+    @NotNull(message = "New dormitory cases count must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int newDormitoryCases;
 
     @Column(name = "new_imported_cases")
     @NotNull(message = "New imported cases count count must not be null")
@@ -72,16 +77,6 @@ public class CovidData {
     @NotNull(message = "Total swab count must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
     private int totalSwab;
-
-    @Column(name = "average_daily_swab_per_week")
-    @NotNull(message = "Average daily number of swab count must not be null")
-    @PositiveOrZero(message = "Count must be positive or zero")
-    private int averageDailySwabPerWeek;
-
-    @Column(name = "total_swabs_per_million")
-    @NotNull(message = "Total swabs per 1,000,000 in total population must not be null")
-    @PositiveOrZero(message = "Count must be positive or zero")
-    private int totalSwabPerMillion;
 
     @Column(name = "total_vaccination_dose")
     @NotNull(message = "Total vaccination dose count must not be null")
