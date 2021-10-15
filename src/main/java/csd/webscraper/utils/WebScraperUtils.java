@@ -5,16 +5,24 @@ import java.util.List;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Component;
 
+import csd.webscraper.exception.WebElementNotFoundException;
 import csd.webscraper.model.CovidData;
 
 @Component
 public class WebScraperUtils {
     private static final List<String> COVID_DATA = List.of(
-        "Total new cases", "Local cases", "Imported cases", "Total covid cases", "Total recovered", "Total deaths",
-        "Hospitalised", "Hospitalised (ICU)", "Require Oxygen Supplementation", "Total Swabs Tested",
-        "Average Daily Number of Swabs Tested Over The Past Week", "Total Swabs Per 1,000,000 Total Population",
-        "Total Doses Administrated", "Received at least one dose", "Completed full regimen"
-    );
+        // Table headers from www.moh.gov.sg
+        "Total Swabs Tested",
+
+        // Table headers from www.gov.sg #casesummary table
+        "Total new cases", "Community", "Dormitory", "Imported", "Hospitalised", "Require oxygen supplementation", "In Intensive Care Unit", "Number of deaths^",
+
+        // Table headers from www.gov.sg #vaccinedata table
+        "Total Doses Administrated", "Received at least one dose", "Completed full regimen",
+
+        // Table headers from www.worldmeters.info
+        "Coronavirus Cases", "Recovered"
+        );
 
     public static ChromeOptions getChromeOptions() {
         ChromeOptions chromeOptions = new ChromeOptions();
@@ -30,55 +38,64 @@ public class WebScraperUtils {
 
     // This method checks if the header of the data inside the website corresponds
     // to the one we're looking for
-    public static boolean isCovidData(String header) {
-        return COVID_DATA.contains(header);
+    public static boolean isCovidData(String header) throws WebElementNotFoundException {
+        if (COVID_DATA.contains(header)) {
+            return true;
+        }
+        throw new WebElementNotFoundException(header);
     }
 
     public static void updateModel(CovidData covidData, String header, int value) {
         switch (header) {
+            // From www.moh.gov.sg website
+            case "Total Swabs Tested":
+                covidData.setTotalSwab(value);
+                break;
+
+            // From www.gov.sg case summary table
             case "Total new cases":
                 covidData.setNewCases(value);
                 break;
-            case "Local cases":
-                covidData.setNewLocalCases(value);
+            case "Community":
+                covidData.setNewCommunityCases(value);
                 break;
-            case "Imported cases":
+            case "Dormitory":
+                covidData.setNewDormitoryCases(value);
+                break;
+            case "Imported":
                 covidData.setNewImportedCases(value);
                 break;
             case "Hospitalised":
                 covidData.setHospitalised(value);
                 break;
-            case "Hospitalised (ICU)":
-                covidData.setHospitalisedICU(value);
-                break;
-            case "Require Oxygen Supplementation":
+            case "Require oxygen supplementation":
                 covidData.setRequireOxygen(value);
                 break;
-            case "Total deaths":
+            case "In Intensive Care Unit":
+                covidData.setHospitalisedICU(value);
+                break;
+            case "Number of deaths^":
                 covidData.setTotalDeaths(value);
                 break;
-            case "Total Swabs Tested":
-                covidData.setTotalSwab(value);
-                break;
-            case "Average Daily Number of Swabs Tested Over The Past Week":
-                covidData.setAverageDailySwabPerWeek(value);
-                break;
-            case "Total Swabs Per 1,000,000 Total Population":
-                covidData.setTotalSwabPerMillion(value);
-                break;
+
+            // From www.gov.sg case vaccine table
             case "Total Doses Administrated":
                 covidData.setTotalVaccinationDoses(value);
                 break;
             case "Received at least one dose":
-                covidData.setAtLeastOneDose(value);
+                covidData.setTotalAtLeastOneDose(value);
                 break;
             case "Completed full regimen":
-                covidData.setCompletedFullRegimen(value);
+                covidData.setTotalCompletedFullRegimen(value);
                 break;
-            case "Total covid cases":
+            
+            // From www.worldmeter.info
+            case "Coronavirus Cases":
                 covidData.setTotalCovidCases(value);
-            case "Total recovered":
+                break;
+            case "Recovered":
                 covidData.setTotalRecovered(value);
+                break;
             default:
                 break;
         }
