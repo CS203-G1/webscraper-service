@@ -83,15 +83,15 @@ public class CovidData {
     @PositiveOrZero(message = "Count must be positive or zero")
     private int totalVaccinationDoses;
 
-    @Column(name = "at_least_one_dose")
+    @Column(name = "total_at_least_one_dose")
     @NotNull(message = "Number of people who received at least one dose must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
-    private int atLeastOneDose;
+    private int totalAtLeastOneDose;
 
-    @Column(name = "completed_full_regimen")
+    @Column(name = "total_completed_full_regimen")
     @NotNull(message = "Number of people who completed full regimen must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
-    private int completedFullRegimen;
+    private int totalCompletedFullRegimen;
 
     @Column(name = "total_covid_cases")
     @NotNull(message = "Number of covid cases must not be null")

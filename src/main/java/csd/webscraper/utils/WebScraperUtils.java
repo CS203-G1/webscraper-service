@@ -11,14 +11,17 @@ import csd.webscraper.model.CovidData;
 @Component
 public class WebScraperUtils {
     private static final List<String> COVID_DATA = List.of(
-        "Local cases", "Imported cases", "Total covid cases", "Total recovered", "Total deaths",
+        // Table headers from www.moh.gov.sg
         "Total Swabs Tested",
 
         // Table headers from www.gov.sg #casesummary table
-        "Total new cases", "Community", "Dormitory", "Imported", "Hospitalised", "Requires oxygen supplementation", "In Intensive Care Unit", "Number of deaths^", "Hospitalised",
+        "Total new cases", "Community", "Dormitory", "Imported", "Hospitalised", "Requires oxygen supplementation", "In Intensive Care Unit", "Number of deaths^",
 
         // Table headers from www.gov.sg #vaccinedata table
-        "Total Doses Administrated", "Received at least one dose", "Completed full regimen"
+        "Total Doses Administrated", "Received at least one dose", "Completed full regimen",
+
+        // Table headers from www.worldmeters.info
+        "Coronavirus Cases", "Recovered"
         );
 
     public static ChromeOptions getChromeOptions() {
@@ -44,6 +47,11 @@ public class WebScraperUtils {
 
     public static void updateModel(CovidData covidData, String header, int value) {
         switch (header) {
+            // From www.moh.gov.sg website
+            case "Total Swabs Tested":
+                covidData.setTotalSwab(value);
+                break;
+
             // From www.gov.sg case summary table
             case "Total new cases":
                 covidData.setNewCases(value);
@@ -60,33 +68,34 @@ public class WebScraperUtils {
             case "Hospitalised":
                 covidData.setHospitalised(value);
                 break;
-            case "In Intensive Care Unit":
-                covidData.setHospitalisedICU(value);
-                break;
             case "Require Oxygen supplementation":
                 covidData.setRequireOxygen(value);
                 break;
-            case "Total deaths":
+            case "In Intensive Care Unit":
+                covidData.setHospitalisedICU(value);
+                break;
+            case "Number of deaths^":
                 covidData.setTotalDeaths(value);
                 break;
-            // TBC
-            case "Total Swabs Tested":
-                covidData.setTotalSwab(value);
-                break;
+
             // From www.gov.sg case vaccine table
             case "Total Doses Administrated":
                 covidData.setTotalVaccinationDoses(value);
                 break;
             case "Received at least one dose":
-                covidData.setAtLeastOneDose(value);
+                covidData.setTotalAtLeastOneDose(value);
                 break;
             case "Completed full regimen":
-                covidData.setCompletedFullRegimen(value);
+                covidData.setTotalCompletedFullRegimen(value);
                 break;
-            case "Total covid cases":
+            
+            // From www.worldmeter.info
+            case "Coronavirus Cases":
                 covidData.setTotalCovidCases(value);
-            case "Total recovered":
+                break;
+            case "Recovered":
                 covidData.setTotalRecovered(value);
+                break;
             default:
                 break;
         }

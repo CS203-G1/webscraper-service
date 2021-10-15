@@ -21,9 +21,9 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 
 @Service
 public class WebScraperServiceImpl implements WebScraperService {
-    private final static String mohUrl = "https://www.moh.gov.sg/covid-19/statistics";
-    private final static String govUrl = "https://www.gov.sg/COVID-19";
-    private final static String caseUrl = "https://www.worldometers.info/coronavirus/country/singapore/";
+    private final static String MOH_URL = "https://www.moh.gov.sg/covid-19/statistics";
+    private final static String GOV_URL = "https://www.gov.sg/COVID-19";
+    private final static String CASE_URL = "https://www.worldometers.info/coronavirus/country/singapore/";
 
     private static final Logger LOGGER = LogManager.getLogger(WebScraperServiceImpl.class);
     private CovidDataRepository covidDataRepository;
@@ -51,9 +51,9 @@ public class WebScraperServiceImpl implements WebScraperService {
     }
 
     public void scrapeMohData(CovidData covidData, WebDriver driver) {
-        LOGGER.info("------ STARTING TO SCRAPE " + mohUrl);
+        LOGGER.info("------ STARTING TO SCRAPE " + MOH_URL);
 
-        driver.get(mohUrl);
+        driver.get(MOH_URL);
         
         try {
             String header = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[1]/td")).getText();
@@ -73,7 +73,7 @@ public class WebScraperServiceImpl implements WebScraperService {
             LOGGER.warn("[UNEXPECTED ERROR]: " + e.getMessage());
         }
 
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + mohUrl);
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + MOH_URL);
     }
 
     public void scrapeGovData(CovidData covidData, WebDriver driver) {
@@ -96,9 +96,9 @@ public class WebScraperServiceImpl implements WebScraperService {
          * 15. <numOfICU>
          * 16. <numOfDeaths>
          */
-        LOGGER.info("------ STARTING TO SCRAPE " + govUrl);
+        LOGGER.info("------ STARTING TO SCRAPE " + GOV_URL);
 
-        driver.get(govUrl);
+        driver.get(GOV_URL);
 
         WebElement localCases = driver.findElement(By.id("localcases"));
         List<WebElement> localCasesTableData = localCases.findElements(By.tagName("td"));
@@ -174,13 +174,13 @@ public class WebScraperServiceImpl implements WebScraperService {
             LOGGER.warn(e.getMessage());
         }
 
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + govUrl);
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + GOV_URL);
     }
 
     public void scrapeCaseData(CovidData covidData, WebDriver driver) {
-        LOGGER.info("------ STARTING TO SCRAPE " + caseUrl);
+        LOGGER.info("------ STARTING TO SCRAPE " + CASE_URL);
 
-        driver.get(caseUrl);
+        driver.get(CASE_URL);
 
         List<WebElement> elements = driver.findElements(By.className("maincounter-number"));
 
@@ -196,6 +196,6 @@ public class WebScraperServiceImpl implements WebScraperService {
             LOGGER.warn(e.getMessage());
         }
 
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + caseUrl);
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + CASE_URL);
     }
 }
