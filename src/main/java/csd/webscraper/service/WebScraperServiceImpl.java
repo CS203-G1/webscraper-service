@@ -39,9 +39,11 @@ public class WebScraperServiceImpl implements WebScraperService {
         WebDriverManager.chromedriver().setup();
         WebDriver driver = new ChromeDriver(WebScraperUtils.getChromeOptions());
 
-        // scrapeMohData(covidData, driver);
+        scrapeMohData(covidData, driver);
         scrapeGovData(covidData, driver);
-        // scrapeCaseData(covidData, driver);
+        scrapeCaseData(covidData, driver);
+
+        System.out.println(covidData);
 
         // covidDataRepository.save(covidData);
         LOGGER.info("------ SAVED MODEL IN DB");
@@ -51,26 +53,27 @@ public class WebScraperServiceImpl implements WebScraperService {
     }
 
     public void scrapeMohData(CovidData covidData, WebDriver driver) {
+        /**
+         * This method only scrapes for the following data:
+         * 1. Total swabs tested
+         */
         LOGGER.info("------ STARTING TO SCRAPE " + MOH_URL);
 
         driver.get(MOH_URL);
         
         try {
-            String header = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[1]/td")).getText();
-            String value = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[2]/td")).getText();
+            String header = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[1]/td/span/strong")).getText();
+            String value = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[2]/td/strong/span/strong")).getText();
 
             if (WebScraperUtils.isCovidData(header)) {
-                WebScraperUtils.updateModel(covidData, header, Integer.parseInt(value));
+                WebScraperUtils.updateModel(covidData, header, Integer.parseInt(value.replace(",", "")));
             }
         } catch (WebElementNotFoundException e) {
-            // LOGGER.warn(e.getMessage());
-            // Consume the error here since it's lazy rendering
-        } catch (IndexOutOfBoundsException e) {
-            // Consume error for data that we do not wish to store
+            LOGGER.warn("------ " + e.getMessage());
         } catch (NumberFormatException e) {
             // Consume error for data that we do not wish to store
         } catch (Exception e) {
-            LOGGER.warn("[UNEXPECTED ERROR]: " + e.getMessage());
+            LOGGER.warn("------ UNEXPECTED ERROR: " + e.getMessage());
         }
 
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + MOH_URL);
@@ -78,66 +81,65 @@ public class WebScraperServiceImpl implements WebScraperService {
 
     public void scrapeGovData(CovidData covidData, WebDriver driver) {
         /**
-         * Data returned from localCases:
-         * 1. Total new cases
-         * 2. <numOfNewCases>
-         * 3. Community
-         * 4. Dormitory
-         * 5. Imported
-         * 6. <numOfCommunity>
-         * 7. <numOfDormitory>
-         * 8. <numOfImported>
-         * 9. Hospitalised
-         * 10. Requires oxygen supplementation
-         * 11. <numOfHospitaled>
-         * 12. <numOfRequireOxygen>
-         * 13. In Intensive Care Unit
-         * 14. Number of deaths^
-         * 15. <numOfICU>
-         * 16. <numOfDeaths>
+         * This method scrapes the following data:
+         * 1. New cases
+         * 2. New community cases
+         * 3. New dormitory cases
+         * 4. New imported cases
+         * 5. Total number of hospitalised
+         * 6. Total number of people that require oxygen supplementation
+         * 7. Total number of people that are in Intensive Care Unit
+         * 8. Total number of deaths
+         * 9. Total number of doses administrated
+         * 10. Total number of people who received at least one dose
+         * 11. Total number of people that completed full regime
          */
         LOGGER.info("------ STARTING TO SCRAPE " + GOV_URL);
 
         driver.get(GOV_URL);
 
-        WebElement localCases = driver.findElement(By.id("localcases"));
-        List<WebElement> localCasesTableData = localCases.findElements(By.tagName("td"));
-
-        // Remove redunant last element inside table
-        // (i.e. Excludes deaths unrelated to COVID-19 complications)
-        localCasesTableData.remove(localCasesTableData.size() - 1);
-
         // Convert WebElements into list of headers and values to store in db
         List<String> headers = new ArrayList<>();
         List<Integer> values = new ArrayList<>();
+
+        updateLocalCasesData(driver, headers, values);
+        updateVaccineData(driver, headers, values);
+
+        for (int i = 0; i < headers.size(); i++) {
+            try {
+                String header = headers.get(i);
+                if (WebScraperUtils.isCovidData(header)) {
+                    WebScraperUtils.updateModel(covidData, header, values.get(i));
+                }
+            } catch(WebElementNotFoundException e) {
+                LOGGER.warn("------ " + e.getMessage());
+            } catch (Exception e) {
+                LOGGER.warn("------ UNEXPECTED ERROR: " + e.getMessage());
+            }
+        }
+
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + GOV_URL);
+    }
+
+    public void updateLocalCasesData(WebDriver driver, List<String> headers, List<Integer> values) {
+        WebElement localCases = driver.findElement(By.id("localcases"));
+        List<WebElement> localCasesTableData = localCases.findElements(By.tagName("td"));
+
+        // Remove redunant element inside table
+        // (i.e. Excludes deaths unrelated to COVID-19 complications)
+        localCasesTableData.remove(localCasesTableData.size() - 1);
 
         for (WebElement element: localCasesTableData) {
             String currentElement = element.getText().strip().replace(",", "");
             try {
                 values.add(Integer.parseInt(currentElement));
-            } catch (NumberFormatException e) {
-                // If element can't be parsed, it's considered a header
+            } catch (NumberFormatException e) {     // If element can't be parsed, it's considered a header
                 headers.add(currentElement);
             }
         }
+    }
 
-        try {
-            for (int i = 0; i < headers.size(); i++) {
-                String header = headers.get(i);
-                if (WebScraperUtils.isCovidData(header)) {
-                    WebScraperUtils.updateModel(covidData, header, values.get(i));
-                }
-            }
-        } catch (WebElementNotFoundException e) {
-            LOGGER.warn(e.getMessage());
-        } catch (Exception e) {
-            LOGGER.warn("[UNEXPECTED ERROR]: " + e.getMessage());
-        }
-
-        // Clear array list instead of instantiating new one
-        headers.clear();
-        values.clear();
-
+    public void updateVaccineData(WebDriver driver, List<String> headers, List<Integer> values) {
         WebElement vaccineData = driver.findElement(By.id("vaccinedata"));
         WebElement vaccineDataSibling = vaccineData.findElement(By.xpath("following-sibling::*"));
         List<WebElement> vaccineDataTableData = vaccineDataSibling.findElements(By.tagName("td"));
@@ -149,51 +151,45 @@ public class WebScraperServiceImpl implements WebScraperService {
             if (currentElement.contains("% of population")) {
                 currentElement = currentElement.split("\s|\n|\r")[0];
             }
-            System.out.println("BEFORE: " + element.getText() + " | AFTER:"+ currentElement + "---");
 
             try {
                 values.add(Integer.parseInt(currentElement));
-            } catch (NumberFormatException e) {
-                // If element can't be parsed, it's considered a header
-                System.out.println("INT ERROR: " + currentElement);
+            } catch (NumberFormatException e) {     // If element can't be parsed, it's considered a header
                 headers.add(currentElement);
             }
         }
-        System.out.println("-------------------");
-        for (int i = 0; i < values.size(); i++) {
-            System.out.println(values.get(i) + " | " + headers.get(i));
-        }
-
-        try {
-            
-        } catch (IndexOutOfBoundsException e) {
-            // Consume error for data that we do not wish to store
-        } catch (NumberFormatException e) {
-            // Consume error for data that we do not wish to store
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage());
-        }
-
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + GOV_URL);
     }
 
     public void scrapeCaseData(CovidData covidData, WebDriver driver) {
+        /**
+         * This method scrapes the following data:
+         * 1. Total covid cases
+         * 2. Total recovered cases
+         */
         LOGGER.info("------ STARTING TO SCRAPE " + CASE_URL);
 
         driver.get(CASE_URL);
 
-        List<WebElement> elements = driver.findElements(By.className("maincounter-number"));
+        List<WebElement> elements = driver.findElements(By.id("maincounter-wrap"));
+        elements.remove(elements.size() - 1);
+        elements.remove(1);
 
-        try {
-            WebScraperUtils.updateModel(covidData, "Total covid cases", Integer.parseInt(elements.get(0).getText().replace(",", "")));
-            WebScraperUtils.updateModel(covidData, "Total deaths", Integer.parseInt(elements.get(1).getText().replace(",", "")));
-            WebScraperUtils.updateModel(covidData, "Total recovered", Integer.parseInt(elements.get(2).getText().replace(",", "")));
-        } catch (IndexOutOfBoundsException e) {
-            // Consume error for data that we do not wish to store
-        } catch (NumberFormatException e) {
-            // Consume error for data that we do not wish to store
-        } catch (Exception e) {
-            LOGGER.warn(e.getMessage());
+        for (WebElement element: elements) {
+            try {
+                String[] data = element.getText().split(":");
+
+                if (WebScraperUtils.isCovidData(data[0])) {
+                    WebScraperUtils.updateModel(covidData, data[0], Integer.parseInt(data[1].replaceAll(",|\n", "")));
+                }
+            } catch(WebElementNotFoundException e) {
+                LOGGER.warn("------ " + e.getMessage());
+            } catch (IndexOutOfBoundsException e) {
+                // Consume error for data that we do not wish to store
+            } catch (NumberFormatException e) {
+                // Consume error for data that we do not wish to store
+            } catch (Exception e) {
+                LOGGER.warn("------ UNEXPECTED ERROR: " + e.getMessage());
+            }
         }
 
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + CASE_URL);
