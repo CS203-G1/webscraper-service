@@ -30,6 +30,7 @@ public class WebScraperServiceImpl implements WebScraperService {
         this.covidDataRepository = covidDataRepository;
     }
 
+    @Override
     @Scheduled(cron = "@midnight")
     public void scrapeData() {
         CovidData covidData = new CovidData();
@@ -39,16 +40,18 @@ public class WebScraperServiceImpl implements WebScraperService {
         scrapeMohData(covidData, driver);
         scrapeGovData(covidData, driver);
         scrapeCaseData(covidData, driver);
+        scrapePopulationData(covidData, driver);
 
         System.out.println(covidData);
 
-        // covidDataRepository.save(covidData);
+        covidDataRepository.save(covidData);
         LOGGER.info("------ SAVED MODEL IN DB");
 
         LOGGER.info("------ SHUTTING DOWN SELENIUM");
         driver.quit();
     }
 
+    @Override
     public void scrapeMohData(CovidData covidData, WebDriver driver) {
         /**
          * This method only scrapes for the following data:
@@ -76,6 +79,7 @@ public class WebScraperServiceImpl implements WebScraperService {
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getMohUrl());
     }
 
+    @Override
     public void scrapeGovData(CovidData covidData, WebDriver driver) {
         /**
          * This method scrapes the following data:
@@ -157,6 +161,7 @@ public class WebScraperServiceImpl implements WebScraperService {
         }
     }
 
+    @Override
     public void scrapeCaseData(CovidData covidData, WebDriver driver) {
         /**
          * This method scrapes the following data:
@@ -194,6 +199,24 @@ public class WebScraperServiceImpl implements WebScraperService {
 
     @Override
     public void scrapePopulationData(CovidData covidData, WebDriver driver) {
+        /**
+         * This method scrapes Singapore's population data
+         */
+        LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getPopulationUrl());
 
+        driver.get(UrlUtils.getPopulationUrl());
+
+        WebElement populationData = driver.findElement(By.className("maincounter-number"));
+
+        try {
+            int population = Integer.parseInt(populationData.getText().replaceAll(",", ""));
+            covidData.setTotalPopulation(population);
+        } catch (NumberFormatException e) {
+            // Consume error for data that we do not wish to store
+        } catch (Exception e) {
+            LOGGER.warn("------ UNEXPECTED ERROR: " + e.getMessage());
+        }
+
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getPopulationUrl());
     }
 }
