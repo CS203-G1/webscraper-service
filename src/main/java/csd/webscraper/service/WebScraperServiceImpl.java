@@ -51,12 +51,15 @@ public class WebScraperServiceImpl implements WebScraperService {
         driver.quit();
     }
 
+    /**
+     * This method only scrapes for the following data:
+     * 1. Total swabs tested
+     * 
+     * @param covidData Model that contains the scraped data that will be stored in db
+     * @param driver Selenium webdriver that is used to scrape data
+     */
     @Override
     public void scrapeMohData(CovidData covidData, WebDriver driver) {
-        /**
-         * This method only scrapes for the following data:
-         * 1. Total swabs tested
-         */
         LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getMohUrl());
 
         driver.get(UrlUtils.getMohUrl());
@@ -79,22 +82,25 @@ public class WebScraperServiceImpl implements WebScraperService {
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getMohUrl());
     }
 
+    /**
+     * This method scrapes the following data:
+     * 1. New cases
+     * 2. New community cases
+     * 3. New dormitory cases
+     * 4. New imported cases
+     * 5. Total number of hospitalised
+     * 6. Total number of people that require oxygen supplementation
+     * 7. Total number of people that are in Intensive Care Unit
+     * 8. Total number of deaths
+     * 9. Total number of doses administrated
+     * 10. Total number of people who received at least one dose
+     * 11. Total number of people that completed full regime
+     * 
+     * @param covidData Model that contains the scraped data that will be stored in db
+     * @param driver Selenium webdriver that is used to scrape data
+     */
     @Override
     public void scrapeGovData(CovidData covidData, WebDriver driver) {
-        /**
-         * This method scrapes the following data:
-         * 1. New cases
-         * 2. New community cases
-         * 3. New dormitory cases
-         * 4. New imported cases
-         * 5. Total number of hospitalised
-         * 6. Total number of people that require oxygen supplementation
-         * 7. Total number of people that are in Intensive Care Unit
-         * 8. Total number of deaths
-         * 9. Total number of doses administrated
-         * 10. Total number of people who received at least one dose
-         * 11. Total number of people that completed full regime
-         */
         LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getGovUrl());
 
         driver.get(UrlUtils.getGovUrl());
@@ -161,13 +167,16 @@ public class WebScraperServiceImpl implements WebScraperService {
         }
     }
 
+    /**
+     * This method scrapes the following data:
+     * 1. Total covid cases
+     * 2. Total recovered cases
+     * 
+     * @param covidData Model that contains the scraped data that will be stored in db
+     * @param driver Selenium webdriver that is used to scrape data
+     */
     @Override
     public void scrapeCaseData(CovidData covidData, WebDriver driver) {
-        /**
-         * This method scrapes the following data:
-         * 1. Total covid cases
-         * 2. Total recovered cases
-         */
         LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getCaseUrl());
 
         driver.get(UrlUtils.getCaseUrl());
@@ -197,11 +206,14 @@ public class WebScraperServiceImpl implements WebScraperService {
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getCaseUrl());
     }
 
+    /**
+     * This method scrapes Singapore's population data
+     * 
+     * @param covidData Model that contains the scraped data that will be stored in db
+     * @param driver Selenium webdriver that is used to scrape data
+     */
     @Override
     public void scrapePopulationData(CovidData covidData, WebDriver driver) {
-        /**
-         * This method scrapes Singapore's population data
-         */
         LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getPopulationUrl());
 
         driver.get(UrlUtils.getPopulationUrl());
