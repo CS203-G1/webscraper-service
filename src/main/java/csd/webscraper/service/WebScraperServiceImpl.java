@@ -16,15 +16,12 @@ import org.springframework.stereotype.Service;
 import csd.webscraper.exception.WebElementNotFoundException;
 import csd.webscraper.model.CovidData;
 import csd.webscraper.repository.CovidDataRepository;
+import csd.webscraper.utils.UrlUtils;
 import csd.webscraper.utils.WebScraperUtils;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 @Service
 public class WebScraperServiceImpl implements WebScraperService {
-    private final static String MOH_URL = "https://www.moh.gov.sg/covid-19/statistics";
-    private final static String GOV_URL = "https://www.gov.sg/COVID-19";
-    private final static String CASE_URL = "https://www.worldometers.info/coronavirus/country/singapore/";
-
     private static final Logger LOGGER = LogManager.getLogger(WebScraperServiceImpl.class);
     private CovidDataRepository covidDataRepository;
 
@@ -57,9 +54,9 @@ public class WebScraperServiceImpl implements WebScraperService {
          * This method only scrapes for the following data:
          * 1. Total swabs tested
          */
-        LOGGER.info("------ STARTING TO SCRAPE " + MOH_URL);
+        LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getMohUrl());
 
-        driver.get(MOH_URL);
+        driver.get(UrlUtils.getMohUrl());
         
         try {
             String header = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[1]/td/span/strong")).getText();
@@ -76,7 +73,7 @@ public class WebScraperServiceImpl implements WebScraperService {
             LOGGER.warn("------ UNEXPECTED ERROR: " + e.getMessage());
         }
 
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + MOH_URL);
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getMohUrl());
     }
 
     public void scrapeGovData(CovidData covidData, WebDriver driver) {
@@ -94,9 +91,9 @@ public class WebScraperServiceImpl implements WebScraperService {
          * 10. Total number of people who received at least one dose
          * 11. Total number of people that completed full regime
          */
-        LOGGER.info("------ STARTING TO SCRAPE " + GOV_URL);
+        LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getGovUrl());
 
-        driver.get(GOV_URL);
+        driver.get(UrlUtils.getGovUrl());
 
         // Convert WebElements into list of headers and values to store in db
         List<String> headers = new ArrayList<>();
@@ -118,7 +115,7 @@ public class WebScraperServiceImpl implements WebScraperService {
             }
         }
 
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + GOV_URL);
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getGovUrl());
     }
 
     public void updateLocalCasesData(WebDriver driver, List<String> headers, List<Integer> values) {
@@ -166,9 +163,9 @@ public class WebScraperServiceImpl implements WebScraperService {
          * 1. Total covid cases
          * 2. Total recovered cases
          */
-        LOGGER.info("------ STARTING TO SCRAPE " + CASE_URL);
+        LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getCaseUrl());
 
-        driver.get(CASE_URL);
+        driver.get(UrlUtils.getCaseUrl());
 
         List<WebElement> elements = driver.findElements(By.id("maincounter-wrap"));
         elements.remove(elements.size() - 1);
@@ -192,6 +189,11 @@ public class WebScraperServiceImpl implements WebScraperService {
             }
         }
 
-        LOGGER.info("------ SUCCESSFULLY SCRAPED " + CASE_URL);
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getCaseUrl());
+    }
+
+    @Override
+    public void scrapePopulationData(CovidData covidData, WebDriver driver) {
+
     }
 }
