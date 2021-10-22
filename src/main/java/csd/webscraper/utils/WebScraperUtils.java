@@ -15,7 +15,7 @@ public class WebScraperUtils {
         "Total Swabs Tested",
 
         // Table headers from www.gov.sg #casesummary table
-        "Total new cases", "Community", "Dormitory", "Imported", "Hospitalised", "Require oxygen supplementation", "In Intensive Care Unit", "Number of deaths^",
+        "Total new cases", "Community", "Dormitory", "Imported", "Hospitalised", "Requires oxygen supplementation", "In Intensive Care Unit", "Number of deaths^",
 
         // Table headers from www.gov.sg #vaccinedata table
         "Total Doses Administrated", "Received at least one dose", "Completed full regimen",
@@ -68,7 +68,7 @@ public class WebScraperUtils {
             case "Hospitalised":
                 covidData.setHospitalised(value);
                 break;
-            case "Require oxygen supplementation":
+            case "Requires oxygen supplementation":
                 covidData.setRequireOxygen(value);
                 break;
             case "In Intensive Care Unit":

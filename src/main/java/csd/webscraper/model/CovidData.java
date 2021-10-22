@@ -103,6 +103,11 @@ public class CovidData {
     @PositiveOrZero(message = "Count must be positive or zero")
     private int totalRecovered;
 
+    @Column(name = "total_population")
+    @NotNull(message = "Number of total population must not be null")
+    @PositiveOrZero(message = "Count must be positive or zero")
+    private int totalPopulation;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
