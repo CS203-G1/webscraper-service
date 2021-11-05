@@ -28,10 +28,11 @@ public class WebScraperUtils {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--disable-gpu");
         chromeOptions.addArguments("--disable-extensions");
-        chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--disable-dev-shm-usage");
+        chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--start-maximized");
+        chromeOptions.addArguments("--remote-debugging-port=9222");
 
         return chromeOptions;
     }
