@@ -35,13 +35,13 @@ public class WebScraperServiceTest {
     //     if (driver != null) driver.quit();
     // }
 
-    @Test
-    public void scrapeMohData_TableHeadersExist_ScrapeSuccess() {
-        driver.get(UrlUtils.getMohUrl());
-        String header = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[1]/td/span/strong")).getText();
+    // @Test
+    // public void scrapeMohData_TableHeadersExist_ScrapeSuccess() {
+    //     driver.get(UrlUtils.getMohUrl());
+    //     String header = driver.findElement(By.xpath("//*[@id=\"ContentPlaceHolder_contentPlaceholder_C030_Col00\"]/div/div/table/tbody/tr[1]/td/span/strong")).getText();
 
-        assertEquals(header, "Total Swabs Tested");
-    }
+    //     assertEquals(header, "Total Swabs Tested");
+    // }
 
     // @Test
     // public void scrapeGovData_TableHeadersExist_ScrapeSuccess() {
