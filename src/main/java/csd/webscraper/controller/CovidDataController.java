@@ -17,7 +17,7 @@ public class CovidDataController {
         this.webScraperService = webScraperService;
     }
 
-    @GetMapping("/healthcheck")
+    @GetMapping("/actuator/health")
     public ResponseEntity<String> getHealthCheck() {
         return new ResponseEntity<String>("Webscraper service is healthy", HttpStatus.OK);
     }
