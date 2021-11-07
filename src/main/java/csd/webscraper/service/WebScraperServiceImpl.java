@@ -34,13 +34,14 @@ public class WebScraperServiceImpl implements WebScraperService {
     @Scheduled(cron = "@midnight")
     public void scrapeData() {
         CovidData covidData = new CovidData();
-        WebDriverManager.chromedriver().setup();
+        WebDriverManager.chromedriver().browserInDocker().enableVnc().enableRecording();
         WebDriver driver = new ChromeDriver(WebScraperUtils.getChromeOptions());
 
         scrapeMohData(covidData, driver);
         scrapeGovData(covidData, driver);
         scrapeCaseData(covidData, driver);
         scrapePopulationData(covidData, driver);
+        scrapeVaccinationData(covidData, driver);
 
         System.out.println(covidData);
 
@@ -88,13 +89,6 @@ public class WebScraperServiceImpl implements WebScraperService {
      * 2. New community cases
      * 3. New dormitory cases
      * 4. New imported cases
-     * 5. Total number of hospitalised
-     * 6. Total number of people that require oxygen supplementation
-     * 7. Total number of people that are in Intensive Care Unit
-     * 8. Total number of deaths
-     * 9. Total number of doses administrated
-     * 10. Total number of people who received at least one dose
-     * 11. Total number of people that completed full regime
      * 
      * @param covidData Model that contains the scraped data that will be stored in db
      * @param driver Selenium webdriver that is used to scrape data
@@ -110,7 +104,6 @@ public class WebScraperServiceImpl implements WebScraperService {
         List<Integer> values = new ArrayList<>();
 
         updateLocalCasesData(driver, headers, values);
-        updateVaccineData(driver, headers, values);
 
         for (int i = 0; i < headers.size(); i++) {
             try {
@@ -146,31 +139,11 @@ public class WebScraperServiceImpl implements WebScraperService {
         }
     }
 
-    public void updateVaccineData(WebDriver driver, List<String> headers, List<Integer> values) {
-        WebElement vaccineData = driver.findElement(By.id("vaccinedata"));
-        WebElement vaccineDataSibling = vaccineData.findElement(By.xpath("following-sibling::*"));
-        List<WebElement> vaccineDataTableData = vaccineDataSibling.findElements(By.tagName("td"));
-
-        for (WebElement element: vaccineDataTableData) {
-            String currentElement = element.getText().strip().replace(",", "");
-            
-            // Corner case where some table data contains (i.e. 85% of population)
-            if (currentElement.contains("% of population")) {
-                currentElement = currentElement.split("\s|\n|\r")[0];
-            }
-
-            try {
-                values.add(Integer.parseInt(currentElement));
-            } catch (NumberFormatException e) {     // If element can't be parsed, it's considered a header
-                headers.add(currentElement);
-            }
-        }
-    }
-
     /**
      * This method scrapes the following data:
      * 1. Total covid cases
      * 2. Total recovered cases
+     * 3. Total deaths
      * 
      * @param covidData Model that contains the scraped data that will be stored in db
      * @param driver Selenium webdriver that is used to scrape data
@@ -183,7 +156,6 @@ public class WebScraperServiceImpl implements WebScraperService {
 
         List<WebElement> elements = driver.findElements(By.id("maincounter-wrap"));
         elements.remove(elements.size() - 1);
-        elements.remove(1);
 
         for (WebElement element: elements) {
             try {
@@ -230,5 +202,32 @@ public class WebScraperServiceImpl implements WebScraperService {
         }
 
         LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getPopulationUrl());
+    }
+
+    @Override
+    public void scrapeVaccinationData(CovidData covidData, WebDriver driver) {
+        LOGGER.info("------ STARTING TO SCRAPE " + UrlUtils.getVaccinationUrl());
+
+        driver.get(UrlUtils.getVaccinationUrl());
+
+        WebElement webElement = driver.findElement(By.xpath("/html/body/div/div[1]/div[3]"));
+
+        try {
+            String[] vaccinationData = webElement.getText().split("\r|\n");
+            for (int i = 0; i < vaccinationData.length; i+=2) {
+                String header = vaccinationData[i].split("/")[0].trim();
+                int value = Integer.parseInt(vaccinationData[i + 1].split("/")[0].trim().replaceAll(",", ""));
+
+                if (WebScraperUtils.isCovidData(header)) {
+                    WebScraperUtils.updateModel(covidData, header, value);
+                }
+            }
+        } catch (NumberFormatException e) {
+            // Consume error for data that we do not wish to store
+        } catch (Exception e) {
+            LOGGER.warn("------ UNEXPECTED ERROR: " + e.getMessage());
+        }
+
+        LOGGER.info("------ SUCCESSFULLY SCRAPED " + UrlUtils.getVaccinationUrl());
     }
 }

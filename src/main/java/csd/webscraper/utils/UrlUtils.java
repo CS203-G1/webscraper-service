@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 public class UrlUtils {
     private final static String MOH_URL = "https://www.moh.gov.sg/covid-19/statistics";
     private final static String GOV_URL = "https://www.gov.sg/COVID-19";
+    private final static String VACCINATION_URL = "https://covidvax.live/location/sgp";
     private final static String CASE_URL = "https://www.worldometers.info/coronavirus/country/singapore/";
     private final static String POPULATION_URL = "https://www.worldometers.info/world-population/singapore-population/";
 
@@ -23,5 +24,9 @@ public class UrlUtils {
 
     public static String getPopulationUrl() {
         return POPULATION_URL;
+    }
+
+    public static String getVaccinationUrl() {
+        return VACCINATION_URL;
     }
 }

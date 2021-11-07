@@ -15,13 +15,16 @@ public class WebScraperUtils {
         "Total Swabs Tested",
 
         // Table headers from www.gov.sg #casesummary table
-        "Total new cases", "Community", "Dormitory", "Imported", "Number of deaths^",
+        "Total new cases", "Community", "Dormitory", "Imported",
 
         // Table headers from www.gov.sg #vaccinedata table
-        "Total Doses Administrated", "Received at least one dose", "Completed full regimen",
+        // "Total Doses Administrated", "Received at least one dose", "Completed full regimen",
+
+        // Table headers from covidvax.live
+        "Total Doses", "People Vaccinated", "Completed Vaccinations",
 
         // Table headers from www.worldmeters.info
-        "Coronavirus Cases", "Recovered"
+        "Coronavirus Cases", "Recovered", "Deaths"
         );
 
     public static ChromeOptions getChromeOptions() {
@@ -32,7 +35,7 @@ public class WebScraperUtils {
         chromeOptions.addArguments("--no-sandbox");
         chromeOptions.addArguments("--headless");
         chromeOptions.addArguments("--start-maximized");
-        chromeOptions.addArguments("--remote-debugging-port=9222");
+        chromeOptions.addArguments("--remote-debugging-port=9230");
 
         return chromeOptions;
     }
@@ -66,18 +69,29 @@ public class WebScraperUtils {
             case "Imported":
                 covidData.setNewImportedCases(value);
                 break;
-            case "Number of deaths^":
+            case "Deaths":
                 covidData.setTotalDeaths(value);
                 break;
 
             // From www.gov.sg case vaccine table
-            case "Total Doses Administrated":
+            // case "Total Doses Administrated":
+            //     covidData.setTotalVaccinationDoses(value);
+            //     break;
+            // case "Received at least one dose":
+            //     covidData.setTotalAtLeastOneDose(value);
+            //     break;
+            // case "Completed full regimen":
+            //     covidData.setTotalCompletedFullRegimen(value);
+            //     break;
+
+            // From covidvax.live
+            case "Total Doses":
                 covidData.setTotalVaccinationDoses(value);
                 break;
-            case "Received at least one dose":
+            case "People Vaccinated":
                 covidData.setTotalAtLeastOneDose(value);
                 break;
-            case "Completed full regimen":
+            case "Completed Vaccinations":
                 covidData.setTotalCompletedFullRegimen(value);
                 break;
             
