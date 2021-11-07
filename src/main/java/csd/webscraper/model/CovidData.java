@@ -53,21 +53,6 @@ public class CovidData {
     @PositiveOrZero(message = "Count must be positive or zero")
     private int newImportedCases;
 
-    @Column(name = "hospitalised")
-    @NotNull(message = "Hospitalised count must not be null")
-    @PositiveOrZero(message = "Count must be positive or zero")
-    private int hospitalised;
-
-    @Column(name = "hospitalised_icu")
-    @NotNull(message = "Hospitalised ICU count must not be null")
-    @PositiveOrZero(message = "Count must be positive or zero")
-    private int hospitalisedICU;
-
-    @Column(name = "require_oxygen_supplementation")
-    @NotNull(message = "Require Oxygen Supplementation count must not be null")
-    @PositiveOrZero(message = "Count must be positive or zero")
-    private int requireOxygen;
-
     @Column(name = "total_deaths")
     @NotNull(message = "Death count must not be null")
     @PositiveOrZero(message = "Count must be positive or zero")
