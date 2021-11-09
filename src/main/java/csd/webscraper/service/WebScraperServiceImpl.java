@@ -34,7 +34,7 @@ public class WebScraperServiceImpl implements WebScraperService {
     @Scheduled(cron = "@midnight")
     public void scrapeData() {
         CovidData covidData = new CovidData();
-        WebDriverManager.chromedriver().browserInDocker().enableVnc().enableRecording();
+        WebDriverManager.chromedriver().setup();;
         WebDriver driver = new ChromeDriver(WebScraperUtils.getChromeOptions());
 
         scrapeMohData(covidData, driver);
